@@ -5,6 +5,8 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/services.dart';
 
 const firebaseOptions = FirebaseOptions(
@@ -16,9 +18,22 @@ const firebaseOptions = FirebaseOptions(
   appId: '1:715500494673:web:fbbf5a240f1900b64d7d70',
 );
 
+const androidFirebaseOptions = FirebaseOptions(
+  apiKey: 'AIzaSyAwWBOZKnRO9J0CtEa-WDKmCyvr48kEQeA',
+  appId: '1:715500494673:android:89f0ff7a8c6b4f814d7d70',
+  messagingSenderId: '715500494673',
+  projectId: 'daysthatcount-27055',
+  storageBucket: 'daysthatcount-27055.firebasestorage.app',
+);
+
+FirebaseOptions get currentFirebaseOptions =>
+    (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+        ? androidFirebaseOptions
+        : firebaseOptions;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: firebaseOptions);
+  await Firebase.initializeApp(options: currentFirebaseOptions);
   runApp(const DaysThatCountApp());
 }
 
@@ -133,41 +148,16 @@ ThemeData buildTheme() {
 // =====================================================================
 
 const _monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 const _monthShort = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 const _weekdayNames = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+  'Friday', 'Saturday', 'Sunday',
 ];
 // February allows 29 because there is no year to check against.
 const _daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -277,8 +267,7 @@ class BirthdayStore extends ChangeNotifier {
       onError: (e) {
         debugPrint('[store] listen error: $e');
         loading = false;
-        error =
-            "We couldn't load your birthdays. Check your connection and try again.";
+        error = "We couldn't load your birthdays. Check your connection and try again.";
         notifyListeners();
       },
     );
@@ -432,11 +421,9 @@ class LinkImporter {
       debugPrint('[importer] your links: ${snap.docs.length}');
       for (final doc in snap.docs) {
         if (_subs.containsKey(doc.id)) continue;
-        _subs[doc.id] =
-            doc.reference.collection('submissions').snapshots().listen(
+        _subs[doc.id] = doc.reference.collection('submissions').snapshots().listen(
           (subSnap) {
-            debugPrint(
-                '[importer] submissions waiting on ${doc.id}: ${subSnap.docs.length}');
+            debugPrint('[importer] submissions waiting on ${doc.id}: ${subSnap.docs.length}');
             for (final sub in subSnap.docs) {
               _import(uid, sub);
             }
@@ -479,11 +466,8 @@ class LinkImporter {
 
       final db = FirebaseFirestore.instance;
       final batch = db.batch();
-      if (name.isNotEmpty &&
-          !store.exists(name, day, month) &&
-          _recent.add(key)) {
-        final ref =
-            db.collection('users').doc(uid).collection('birthdays').doc();
+      if (name.isNotEmpty && !store.exists(name, day, month) && _recent.add(key)) {
+        final ref = db.collection('users').doc(uid).collection('birthdays').doc();
         batch.set(ref, {
           'name': name,
           'day': day,
@@ -656,8 +640,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _resetPassword() async {
     final email = _email.text.trim();
     if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-      setState(() =>
-          _error = 'Enter your email above first, then tap "Forgot password?"');
+      setState(() => _error = 'Enter your email above first, then tap "Forgot password?"');
       return;
     }
     try {
@@ -729,8 +712,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         controller: _name,
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.next,
-                        decoration:
-                            const InputDecoration(hintText: 'e.g. Thandi'),
+                        decoration: const InputDecoration(hintText: 'e.g. Thandi'),
                         validator: (v) {
                           final t = (v ?? '').trim();
                           if (t.isEmpty) return 'Please enter your name';
@@ -745,12 +727,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      decoration:
-                          const InputDecoration(hintText: 'you@example.com'),
+                      decoration: const InputDecoration(hintText: 'you@example.com'),
                       validator: (v) {
                         final t = (v ?? '').trim();
-                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                            .hasMatch(t)) {
+                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t)) {
                           return 'Please enter a valid email';
                         }
                         return null;
@@ -1007,8 +987,7 @@ class SectionTitle extends StatelessWidget {
 }
 
 class SmallLabel extends StatelessWidget {
-  const SmallLabel(this.text,
-      {super.key, this.color = AppColors.textSecondary});
+  const SmallLabel(this.text, {super.key, this.color = AppColors.textSecondary});
   final String text;
   final Color color;
 
@@ -1547,8 +1526,7 @@ class _LinkSheetState extends State<LinkSheet> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _error =
-            "Couldn't create your link. Check your connection and try again.";
+        _error = "Couldn't create your link. Check your connection and try again.";
       });
     }
   }
@@ -1563,14 +1541,12 @@ class _LinkSheetState extends State<LinkSheet> {
       await LinkService.deactivate(token);
       nav.pop();
       messenger.showSnackBar(
-        const SnackBar(
-            content: Text('Link turned off. A new one is made next time.')),
+        const SnackBar(content: Text('Link turned off. A new one is made next time.')),
       );
     } catch (_) {
       if (mounted) setState(() => _busy = false);
       messenger.showSnackBar(
-        const SnackBar(
-            content: Text("Couldn't turn it off. Please try again.")),
+        const SnackBar(content: Text("Couldn't turn it off. Please try again.")),
       );
     }
   }
@@ -1634,9 +1610,7 @@ class _LinkSheetState extends State<LinkSheet> {
                 Clipboard.setData(ClipboardData(text: url));
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Link copied. Paste it into WhatsApp or SMS.')),
+                  const SnackBar(content: Text('Link copied. Paste it into WhatsApp or SMS.')),
                 );
               },
               icon: const Icon(Icons.copy_rounded, size: 20),
@@ -1711,8 +1685,7 @@ class _OptionCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded,
-              color: AppColors.textSecondary),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
         ],
       ),
     );
@@ -1762,9 +1735,8 @@ class _AddBirthdayScreenState extends State<AddBirthdayScreen> {
   Future<void> _save() async {
     final formOk = _formKey.currentState!.validate();
     setState(() {
-      _dateError = (_month == null || _day == null)
-          ? 'Please choose a month and day'
-          : null;
+      _dateError =
+          (_month == null || _day == null) ? 'Please choose a month and day' : null;
     });
     if (!formOk || _month == null || _day == null) return;
 
@@ -1792,14 +1764,12 @@ class _AddBirthdayScreenState extends State<AddBirthdayScreen> {
       await op.timeout(const Duration(seconds: 10));
       nav.pop();
       messenger.showSnackBar(
-        SnackBar(
-            content: Text(existing == null ? '$name added' : 'Changes saved')),
+        SnackBar(content: Text(existing == null ? '$name added' : 'Changes saved')),
       );
     } on TimeoutException {
       nav.pop();
       messenger.showSnackBar(
-        const SnackBar(
-            content: Text("Saved. It will sync when you're back online.")),
+        const SnackBar(content: Text("Saved. It will sync when you're back online.")),
       );
     } catch (_) {
       if (mounted) setState(() => _saving = false);
@@ -1861,8 +1831,7 @@ class _AddBirthdayScreenState extends State<AddBirthdayScreen> {
               TextFormField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration:
-                    const InputDecoration(hintText: 'e.g. Nomsa Dlamini'),
+                decoration: const InputDecoration(hintText: 'e.g. Nomsa Dlamini'),
                 validator: (v) {
                   final t = (v ?? '').trim();
                   if (t.isEmpty) return 'Please enter a name';
@@ -1947,8 +1916,7 @@ class _AddBirthdayScreenState extends State<AddBirthdayScreen> {
                   padding: const EdgeInsets.only(top: 8, left: 4),
                   child: Text(
                     _dateError!,
-                    style:
-                        const TextStyle(color: AppColors.error, fontSize: 12),
+                    style: const TextStyle(color: AppColors.error, fontSize: 12),
                   ),
                 ),
               const SizedBox(height: 20),
@@ -2037,8 +2005,7 @@ class BirthdayDetailScreen extends StatelessWidget {
         messenger.showSnackBar(SnackBar(content: Text('${b.name} deleted')));
       } on TimeoutException {
         messenger.showSnackBar(
-          const SnackBar(
-              content: Text("Deleted. It will sync when you're back online.")),
+          const SnackBar(content: Text("Deleted. It will sync when you're back online.")),
         );
       } catch (_) {
         messenger.showSnackBar(
@@ -2095,8 +2062,7 @@ class BirthdayDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               AppCard(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
                 child: Row(
                   children: [
                     Expanded(
