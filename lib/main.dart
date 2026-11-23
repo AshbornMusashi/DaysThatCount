@@ -380,7 +380,7 @@ final store = BirthdayStore();
 
 class LinkService {
   // The public page that people open. We create it in the next step.
-  static const baseUrl = 'https://ashbornmusashi.github.io/days-that-count/';
+  static const baseUrl = 'https://ashbornmusashi.github.io/DaysThatCount/';
 
   static String urlFor(String token) => '$baseUrl?t=$token';
 
