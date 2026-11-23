@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add your birthday</title>
+  <style>
+    :root {
+      --bg: #F5F6FA;
+      --surface: #FFFFFF;
+      --ink: #15191C;
+      --muted: #6B7177;
+      --border: #E2E5EE;
+      --primary: #1D3BCB;
+      --primary-soft: #E5EAFB;
+      --error: #B3261E;
+      --error-bg: #FCEBEA;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    main { width: 100%; max-width: 420px; }
+    .brand {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: var(--primary); margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand svg { width: 28px; height: 28px; fill: #fff; }
+    h1 { font-size: 28px; line-height: 1.15; letter-spacing: -0.8px; margin: 0 0 8px; font-weight: 800; }
+    p.lead { margin: 0 0 24px; color: var(--muted); line-height: 1.5; }
+    label { display: block; font-size: 13px; font-weight: 700; margin: 0 0 8px; }
+    input, select {
+      width: 100%; font: inherit; color: var(--ink);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 15px 16px; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+    .field { margin-bottom: 20px; }
+    .row { display: flex; gap: 12px; }
+    .row > :first-child { flex: 3; }
+    .row > :last-child { flex: 2; }
+    button {
+      width: 100%; font: inherit; font-weight: 700; font-size: 15px;
+      background: var(--primary); color: #fff; border: 0; border-radius: 14px;
+      padding: 17px; cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: default; }
+    button.link {
+      background: none; color: var(--primary); padding: 12px; margin-top: 8px; width: auto;
+    }
+    .error {
+      background: var(--error-bg); color: var(--error);
+      border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px;
+    }
+    .note { color: var(--muted); font-size: 12.5px; text-align: center; margin-top: 18px; line-height: 1.5; }
+    .hidden { display: none !important; }
+    .hp { position: absolute; left: -9999px; height: 0; width: 0; overflow: hidden; }
+    .center { text-align: center; }
+    .tick {
+      width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 20px;
+      background: var(--primary-soft); display: flex; align-items: center; justify-content: center;
+    }
+    .tick svg { width: 30px; height: 30px; stroke: var(--primary); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .spinner {
+      width: 32px; height: 32px; border-radius: 50%; margin: 40px auto;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 6a2 2 0 0 0 2-2c0-.4-.2-.8-.4-1.1L12 1l-1.6 1.9c-.2.3-.4.7-.4 1.1a2 2 0 0 0 2 2Zm4.6 9.99-1.07-1.07-1.08 1.07c-1.3 1.3-3.58 1.31-4.89 0l-1.07-1.07-1.09 1.07C6.75 16.64 5.88 17 4.96 17c-.73 0-1.4-.23-1.96-.61V21c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-4.61c-.56.38-1.23.61-1.96.61-.92 0-1.79-.36-2.44-1.01ZM18 9h-5V7h-2v2H6c-1.66 0-3 1.34-3 3v1.54c0 1.08.88 1.96 1.96 1.96.52 0 1.02-.2 1.38-.57l2.14-2.13 2.13 2.13c.74.74 2.03.74 2.77 0l2.14-2.13 2.13 2.13c.37.37.86.57 1.38.57 1.08 0 1.96-.88 1.96-1.96V12C21 10.34 19.66 9 18 9Z"/></svg>
+    </div>
+
+    <!-- Loading -->
+    <section id="loading"><div class="spinner" role="status" aria-label="Loading"></div></section>
+
+    <!-- Link is invalid or switched off -->
+    <section id="invalid" class="hidden">
+      <h1>This link isn't working</h1>
+      <p class="lead">It may have been turned off or typed incorrectly. Please ask the person who sent it for a new link.</p>
+    </section>
+
+    <!-- Form -->
+    <section id="formView" class="hidden">
+      <h1 id="heading">Add your birthday</h1>
+      <p class="lead">Just your name and birthday. No account or sign-up needed.</p>
+
+      <form id="form" novalidate>
+        <div id="formError" class="error hidden" role="alert"></div>
+
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" type="text" maxlength="80" autocomplete="name" placeholder="e.g. Nomsa Dlamini">
+        </div>
+
+        <div class="field">
+          <label for="month">Your birthday</label>
+          <div class="row">
+            <select id="month" aria-label="Month"></select>
+            <select id="day" aria-label="Day"></select>
+          </div>
+        </div>
+
+        <!-- Hidden field: real people never see or fill this in -->
+        <div class="hp" aria-hidden="true">
+          <label for="website">Leave this empty</label>
+          <input id="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <button id="submitBtn" type="submit">Send my birthday</button>
+      </form>
+      <p class="note">Only your name and birthday are shared, and only with <span id="ownerNote">the person who sent you this link</span>.</p>
+    </section>
+
+    <!-- Success -->
+    <section id="done" class="hidden center">
+      <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h1 id="doneHeading">Thank you!</h1>
+      <p class="lead" id="doneText"></p>
+      <button class="link" id="againBtn" type="button">Add another birthday</button>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getFirestore, doc, getDoc, collection, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVhMvSIiVtXzkgeDeChRNOs_WzvI0LkW8",
+      authDomain: "daysthatcount-27055.firebaseapp.com",
+      projectId: "daysthatcount-27055",
+      storageBucket: "daysthatcount-27055.firebasestorage.app",
+      messagingSenderId: "715500494673",
+      appId: "1:715500494673:web:fbbf5a240f1900b64d7d70"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const DAYS_IN_MONTH = [31,29,31,30,31,30,31,31,30,31,30,31];
+
+    const $ = (id) => document.getElementById(id);
+    const views = ["loading", "invalid", "formView", "done"];
+    function show(id) { views.forEach((v) => $(v).classList.toggle("hidden", v !== id)); }
+
+    // ---- read the link token from the address (?t=...)
+    const token = new URLSearchParams(location.search).get("t") || "";
+    const tokenLooksValid = /^[a-z0-9]{20,64}$/.test(token);
+
+    let ownerName = "";
+
+    // ---- fill the month and day dropdowns
+    const monthSel = $("month");
+    const daySel = $("day");
+    monthSel.innerHTML = '<option value="">Month</option>' +
+      MONTHS.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+
+    function fillDays() {
+      const m = Number(monthSel.value);
+      const max = m ? DAYS_IN_MONTH[m - 1] : 31;
+      const previous = Number(daySel.value);
+      let html = '<option value="">Day</option>';
+      for (let d = 1; d <= max; d++) html += `<option value="${d}">${d}</option>`;
+      daySel.innerHTML = html;
+      if (previous && previous <= max) daySel.value = String(previous);
+    }
+    monthSel.addEventListener("change", fillDays);
+    fillDays();
+
+    function showFormError(message) {
+      const box = $("formError");
+      box.textContent = message;
+      box.classList.toggle("hidden", !message);
+    }
+
+    // ---- load the link
+    async function init() {
+      if (!tokenLooksValid) { show("invalid"); return; }
+      try {
+        const snap = await getDoc(doc(db, "links", token));
+        if (!snap.exists() || snap.data().active !== true) { show("invalid"); return; }
+        ownerName = String(snap.data().ownerName || "").trim();
+        if (ownerName) {
+          $("heading").textContent = "Add your birthday for " + ownerName;
+          $("ownerNote").textContent = ownerName;
+        }
+        show("formView");
+      } catch (e) {
+        console.error(e);
+        show("invalid");
+      }
+    }
+
+    // ---- submit
+    $("form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showFormError("");
+
+      const name = $("name").value.trim();
+      const month = Number(monthSel.value);
+      const day = Number(daySel.value);
+
+      if (!name) { showFormError("Please enter your name."); return; }
+      if (!month || !day) { showFormError("Please choose your birthday month and day."); return; }
+
+      const button = $("submitBtn");
+      button.disabled = true;
+      button.textContent = "Sending...";
+
+      // Bots tend to fill the hidden field. Pretend it worked, send nothing.
+      if ($("website").value) { finish(name); return; }
+
+      try {
+        await addDoc(collection(db, "links", token, "submissions"), {
+          name: name,
+          day: day,
+          month: month,
+          createdAt: serverTimestamp()
+        });
+        finish(name);
+      } catch (e) {
+        console.error(e);
+        button.disabled = false;
+        button.textContent = "Send my birthday";
+        if (e && e.code === "permission-denied") {
+          showFormError("This link is no longer active. Please ask for a new one.");
+        } else {
+          showFormError("Something went wrong. Please check your connection and try again.");
+        }
+      }
+    });
+
+    function finish(name) {
+      $("doneHeading").textContent = "Thank you, " + name + "!";
+      $("doneText").textContent = ownerName
+        ? "Your birthday has been sent to " + ownerName + "."
+        : "Your birthday has been sent.";
+      show("done");
+    }
+
+    $("againBtn").addEventListener("click", () => {
+      $("name").value = "";
+      monthSel.value = "";
+      fillDays();
+      $("website").value = "";
+      $("submitBtn").disabled = false;
+      $("submitBtn").textContent = "Send my birthday";
+      showFormError("");
+      show("formView");
+    });
+
+    init();
+  </script>
+</body>
+</html>
