@@ -1,17 +1,3 @@
-// Days That Count - UI + Firebase (v7b): login, Firestore birthdays, sharing links + debug logging (single file)
-// Paste this into lib/main.dart in FlutLab.
-//
-// Changes in v7b: same as v7 but prints '[importer] ...' / '[store] ...' lines to the console to help debugging.
-// Changes in v7: 'Request via link' creates a real link (Firestore links/{token});
-//   birthdays submitted through it are imported into your list automatically.
-// Changes in v6: birthdays are saved in Firestore (users/{uid}/birthdays) and update live. Sample data removed.
-// Changes in v5: Firebase init + email/password login, sign up, log out, reset password.
-// Earlier changes (v4):
-//  - Blue palette only (cobalt + sky-blue highlight, no green), flat (no gradients/shadows)
-//  - No relationship feature (no Friend / Family / Colleague)
-//  - Three tabs: Home (next birthday + search + full list by month), Add, Settings
-//  - Birthdays store day + month only (no birth year, no ages)
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
